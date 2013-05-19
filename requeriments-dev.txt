@@ -1,0 +1,6 @@
+python-stdeb
+python-unittest2
+python-all
+afni
+python-matplotlib
+
