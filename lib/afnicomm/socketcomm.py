@@ -11,7 +11,13 @@
 #
 # ----------------------------------------------------------------------
 
-import lib_realtime as RT
+from . import lib_realtime as RT
+
+class TrValues:
+    
+    def __init__(self, rois, tr_number):
+        self.rois = rois
+        self.tr_number = tr_number
 
 #-----------------------------------------------------------------------------------------------------------
 class AfniRt:
@@ -39,9 +45,9 @@ class AfniRt:
     """Wait for new incoming data in socket"""
     return self.RTI.wait_for_new_run()
     
-  def read_all_socket_data(self):
+  def read_TR_data(self):
     """read incoming data"""
-    return self.RTI.read_all_socket_data()
+    return self.RTI.read_TR_data()
     
   def close_data_ports(self):
     """Closes the socket"""
@@ -53,9 +59,30 @@ class AfniRt:
     return self.RTI.extras
     
   def get_rois_number(self):
+    """ Return the number of ROIs received """
     return self.RTI.nextra
+
+  def get_num_read(self):
+    """ Returns the number of TR read per connection"""
+    return self.RTI.nread
+    
+  def get_last_values(self):
+    """                                 ROI1            ROI2                 ROIN
+    values is a matrix with format [[TR,TR,TR,...], [TR,TR,TR,...],... , [TR,TR,TR,...]]    
+    """
+
+    last_values = []
+
+    rois_values = self.get_rois_values()
+    for roi in rois_values:
+        last_values.append(roi[-1])
+        
+    roi_values = TrValues(last_values, self.get_num_read())
+      
+    yield roi_values
+    
     
 #-----------------------------------------------------------------------------------------------------------
     
 if __name__ == '__main__':
-  print '** main is not supported in this library'
+  print('** main is not supported in this library')

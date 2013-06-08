@@ -1,15 +1,45 @@
 import plotter
+import pylab as plb
 
 class TimelinePlotter(plotter.Plotter):
 
-  def __init__(self, plt, verb):
-    plotter.Plotter.__init__(self,plt, verb)
+  def __init__(self, trs_to_mean, verb):
+    plotter.Plotter.__init__(self, verb, trs_to_mean)
+    self.NpointsB = 7
+    self.NpointsA = 3
     
-  def draw_new_values(self, values):
-    """ draw in the next position the set of values passed by argument """
+
+  def draw(self, values):
     vlen = len(values)
-    if vlen:
-      #TODO
-      print "TODO"
+    if vlen == self.nrois:
+        
+      # Increase the xValues to control the plot
+      if len(self.xValues) == 0:
+        self.xValues.append(0)
+      else:
+        self.xValues.append(self.xValues[-1] + 1)            
+        
+      self.yValues.append(values)
+      
+      # Transponse the y values matrix for an easy plot
+      yvt = zip(*self.yValues)
+    
+      if len(self.yValues)-self.NpointsB < 0:
+          CurrentXAxis=plb.arange(0 ,len(self.yValues))
+          for i in plb.arange(0,self.nrois,1):
+            self.lines[i].set_data(CurrentXAxis,yvt[i])
+        
+          self.ax.axis([0, self.NpointsB + self.NpointsA, self.ymin, self.ymax])
+      else:
+          CurrentXAxis=plb.arange(len(self.yValues)-self.NpointsB, len(self.yValues),1)
+          for i in plb.arange(0,self.nrois,1):
+            self.lines[i].set_data(CurrentXAxis,yvt[i][-self.NpointsB:])
+    
+          self.ax.axis([CurrentXAxis.min(), CurrentXAxis.max() + self.NpointsA, self.ymin, self.ymax])
+          
+      if self.isThresholdDef:
+          self.ax.axhline(y=self.threshold)
+              
     else:
-      print "No values to plot"
+       print("Invalid inpunt values")
+          
