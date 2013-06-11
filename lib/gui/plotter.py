@@ -13,6 +13,14 @@ class Plotter:
     self.xValues = []
     self.yValues = []
     self.trs_to_mean = trs_to_mean + 1
+    self.fig = plt.figure()
+    self.fig.patch.set_facecolor('black')
+    self.ax = self.fig.add_subplot(111)
+    self.ax.set_axis_bgcolor('black')
+#    self.background = self.fig.canvas.copy_from_bbox(self.ax.bbox)
+    self.anim = None
+    self.lines = None
+
     
   def set_threshold(self, threshold):
     """ sets the threshold """
@@ -38,13 +46,60 @@ class Plotter:
 
     return self.lines  
     
-  def startFigure(self, nrois, lims, values_func, num_trs_func):
+  def reset_axes(self):
+    # if lines remove them
+    if self.lines:
+        for line in self.lines:
+            line.remove()
+    
+    self.lines = None
+      
+    # Clear the axes
+    self.ax.cla()
+
+
+  def rest_values(self):
+      yield []
+   
+  def startRest(self, message=None):
+
+    print "Starting RESTING state animation"
+
+    #stop previous animation if any
+    if self.anim:
+          self.anim._stop()
+    
+    # stop previous animation if any and clear axes
+    self.reset_axes()
+    
+    self.lines = self.ax.plot([0],[0])
+    
+    self.ax.relim()
+    
+    plt.draw()
+    
+#    self.ax.canvas.restore_region(self.background)
+#    
+#    self.fig.canvas.blit(self.ax.bbox)
+    
+#    if self.anim:
+#        self.ax.redraw_in_frame()
+#    
+#    self.anim = anim.ArtistAnimation(self.fig, self.rest_values())
+        
+    
+  def startRun(self, nrois, lims, values_func, num_trs_func):
+      
+      
+    print "Starting RUN animation"
+    # stop previous animation if any and clear axes
+    self.reset_axes()
+
+    
+#    self.fig.canvas.draw_idle()
 
     self.ymin = lims[0]
-    self.ymax = lims[1]         
-
-    fig = plt.figure()
-    self.ax = fig.add_subplot(111)
+    self.ymax = lims[1]       
 
     self.nrois = nrois
     if self.nrois == 1:
@@ -61,9 +116,19 @@ class Plotter:
       print ("Invalid number of ROIs: %d" % nrois)
       raise AttributeError('The number of rois must be a value between 1 and 5, both included.') 
 
-    self.anim = anim.FuncAnimation(fig, self.update, values_func, interval=100)
-    plt.show()
+#    self.ax.redraw_in_frame()
 
+    self.ax.relim()
+    
+#    if not self.anim:
+    self.anim = anim.FuncAnimation(self.fig, self.update, values_func, interval=100)
+#    else:
+#      self.anim._start()
+      
+    plt.draw()
+
+  def show(self):
+    plt.show()
       
      
   

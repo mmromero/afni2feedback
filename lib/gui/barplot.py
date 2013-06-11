@@ -20,13 +20,13 @@ class BarPlotter(plotter.Plotter):
         
       x = plb.arange(vlen)
       self.ax.cla()
-      self.ax.axis([x[0]-0.2, x[-1]+0.2, self.ymin, self.ymax])
+      self.ax.axis([x[0]-0.8, x[-1]+0.8, self.ymin, self.ymax])
       
       if self.isThresholdDef:
           self.ax.axhline(y=self.threshold)
 
       
-      return self.ax.bar(x,values,width=0.5,bottom=0,align='center')
+      return self.ax.bar(x,values,width=0.8,bottom=0,align='center')
 
 
     else:
