@@ -70,14 +70,16 @@ class AfniRt:
     """                                 ROI1            ROI2                 ROIN
     values is a matrix with format [[TR,TR,TR,...], [TR,TR,TR,...],... , [TR,TR,TR,...]]    
     """
-
-    last_values = []
-
-    rois_values = self.get_rois_values()
-    for roi in rois_values:
-        last_values.append(roi[-1])
-        
-    roi_values = TrValues(last_values, self.get_num_read())
+    if len(self.get_rois_values()) > 0:
+        last_values = []
+        rois_values = self.get_rois_values()
+        for roi in rois_values:
+            if len(roi) > 0:
+                last_values.append(roi[-1])
+            
+        roi_values = TrValues(last_values, self.get_num_read())
+    else:
+        roi_values = TrValues([],0)
       
     yield roi_values
     

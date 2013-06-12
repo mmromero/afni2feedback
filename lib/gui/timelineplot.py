@@ -38,7 +38,7 @@ class TimelinePlotter(plotter.Plotter):
           self.ax.axis([CurrentXAxis.min(), CurrentXAxis.max() + self.NpointsA, self.ymin, self.ymax])
           
       if self.isThresholdDef:
-          self.ax.axhline(y=self.threshold)
+        self.hline = self.ax.axhline(y=self.threshold)
               
     else:
        print("Invalid inpunt values")

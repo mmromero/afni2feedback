@@ -44,13 +44,11 @@ class Neurofeedback:
         # Get an AFNI realtime connection object
         self.comm = afniComm
         self.verbose = verb
-        
-        
-    def iterate_for_runs(self):
-        while 1:
-            
-            # Show restin state image
-            self.graph.startRest()
+    
+    def process_run (self):
+                   # Show restin state image
+            self.graph.set_rest_values()
+            self.graph.start_rest()
     
             # Wait for new data
             if self.comm.wait_for_new_run():
@@ -83,16 +81,20 @@ class Neurofeedback:
             trs_average = rois_sum / (TRS_TO_AVERAGE * self.comm.get_rois_number())
     
             self.graph.set_threshold(trs_average*1.02)
-    
-            self.graph.startRun(self.comm.get_rois_number(), [trs_average*0.97, trs_average*1.07], self.comm.get_last_values, self.comm.get_num_read)
+            self.graph.set_run_values(self.comm.get_rois_number(), [trs_average*0.97, trs_average*1.07])
+            self.graph.start_run()
             
             while not self.comm.read_TR_data(): 
                 pass
-
-
+        
+    def iterate_for_runs(self):
+        while 1:
+            self.process_run()            
+            
         self.comm.close_data_ports()         
                  
         return SUCCESS    
+        
 
     def run(self):
 
@@ -114,7 +116,7 @@ class Neurofeedback:
         thread.start_new_thread (self.iterate_for_runs, ())
         
         # Show image from main thread
-        self.graph.show()
+        self.graph.show(self.comm.get_last_values)
 
 
        
