@@ -1,5 +1,6 @@
 from matplotlib import pyplot as plt
 from matplotlib import animation as anim
+import numpy as np
 import gc
 
 class Plotter:
@@ -74,14 +75,14 @@ class Plotter:
   
   def start_rest(self):
 
-    print "Starting RESTING state"
+    print "Starting RESTING period"
     
     self.status = 'Resting'
 
 
   def start_run(self):
 
-    print "Starting RUN state"
+    print "Starting RUNNING period"
     
     self.status = 'Run'        
 
@@ -98,17 +99,17 @@ class Plotter:
 
 #    if not self.shown:
     self.nrois = nrois
-#        self.shown = True
+
     if self.nrois == 1:
-      self.lines = self.ax.plot([],[])
+      self.lines = self.ax.plot([],[], color='w', linestyle='-', linewidth=2)
     elif self.nrois == 2:
-      self.lines = self.ax.plot([],[],[],[])
+      self.lines = self.ax.plot([],[],[],[], color='w', linestyle='-', linewidth=2)
     elif self.nrois == 3:
-      self.lines = self.ax.plot([],[],[],[],[],[])
+      self.lines = self.ax.plot([],[],[],[],[],[], color='w', linestyle='-', linewidth=2)
     elif self.nrois == 4:
-      self.lines = self.ax.plot([],[],[],[],[],[],[],[])
+      self.lines = self.ax.plot([],[],[],[],[],[],[],[], color='w', linestyle='-', linewidth=2)
     elif self.nrois == 5:
-      self.lines = self.ax.plot([],[],[],[],[],[],[],[],[],[])
+      self.lines = self.ax.plot([],[],[],[],[],[],[],[],[],[], color='w', linestyle='-', linewidth=2)
     else:
       print ("Invalid number of ROIs: %d" % nrois)
       raise AttributeError('The number of rois must be a value between 1 and 5, both included.') 
