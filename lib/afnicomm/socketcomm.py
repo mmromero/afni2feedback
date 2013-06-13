@@ -22,19 +22,21 @@ class TrValues:
 #-----------------------------------------------------------------------------------------------------------
 class AfniRt:
 
-  def __init__(self, port, verbose):
+  def __init__(self, options):
     """ Initialise RTInterface object and define the TCP port and verbose level """
     
     # Afni RTInterface object
     self.RTI = RT.RTInterface()
     
     # Define the port
-    if port > 0:
-      self.RTI.server_port = port
+    if options.port > 0:
+      self.RTI.server_port =  options.port
     
     # Define verborse
-    if verbose > 0 and verbose < 4:
-      self.RTI.verb = verbose
+    if  options.debug > 0 and  options.debug < 4:
+      self.RTI.verb = options.debug
+      
+    self.log = options.log
     
     
   def open_incoming_socket(self):

@@ -3,8 +3,8 @@ from matplotlib import pylab as plb
 
 class BarPlotter(plotter.Plotter):
   
-  def __init__(self, trs_to_mean, verb):
-    plotter.Plotter.__init__(self, trs_to_mean, verb)
+  def __init__(self, options):
+    plotter.Plotter.__init__(self, options)
     
   def draw(self, values):
     """ draw in the next position the set of values passed by argument """

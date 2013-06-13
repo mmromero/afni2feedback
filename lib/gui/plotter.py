@@ -1,25 +1,25 @@
 from matplotlib import pyplot as plt
 from matplotlib import animation as anim
-import numpy as np
 import gc
 
 class Plotter:
 
-  def __init__(self, trs_to_mean, verb=1):
+  def __init__(self, options):
     self.threshold = 0
     self.isThresholdDef = 0
-    self.verbose = verb
+    self.verbose = options.debug
+    self.record = options.record
+    self.color_scheme = options.color_scheme
     self.nrois = 0
     self.ymin = 0
     self.ymax = 0
     self.xValues = []
     self.yValues = []
-    self.trs_to_mean = trs_to_mean + 1
+    self.trs_to_mean = options.trs_mean + 1
     self.fig = plt.figure()
     self.fig.patch.set_facecolor('black')
     self.ax = self.fig.add_subplot(111)
     self.ax.set_axis_bgcolor('black')
-#    self.background = self.fig.canvas.copy_from_bbox(self.ax.bbox)
     self.anim = None
     self.lines = []
     self.shown = False

@@ -3,8 +3,8 @@ import pylab as plb
 
 class TimelinePlotter(plotter.Plotter):
 
-  def __init__(self, trs_to_mean, verb):
-    plotter.Plotter.__init__(self, verb, trs_to_mean)
+  def __init__(self, options):
+    plotter.Plotter.__init__(self, options)
     self.NpointsB = 7
     self.NpointsA = 3
     
