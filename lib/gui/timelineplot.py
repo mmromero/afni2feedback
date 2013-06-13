@@ -41,5 +41,5 @@ class TimelinePlotter(plotter.Plotter):
         self.hline = self.ax.axhline(y=self.threshold, color='w', linestyle='--', linewidth=1)
               
     else:
-       print("Invalid inpunt values")
+       if self.verbose > 1:print("Invalid inpunt values")
           

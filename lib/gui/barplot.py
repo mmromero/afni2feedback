@@ -28,4 +28,4 @@ class BarPlotter(plotter.Plotter):
         self.hline = self.ax.axhline(y=self.threshold, color='w', linestyle='--')
 
     else:
-	print "No values to plot"
+	if self.verbose > 1:print "No values to plot"
