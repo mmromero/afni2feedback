@@ -59,13 +59,7 @@ def parse_options():
                       help="If present it records a mpg4 video \
                       of the experiment.")
                       
-    parser.add_option("-c", "--color-scheme", action="store", 
-                      dest="color_scheme", type="string", 
-                      default="white-black", 
-                      help="Set the plotting color scheme. For a black \
-                      background and white lines use \"white-black\", which \n\
-                      is the default, for a white background with black lines\n\
-                      use \"black-white\".")
+
 
     parser.add_option("-m", "--trs-mean", action="store", 
                       dest="trs_mean", type="int", default=3, 

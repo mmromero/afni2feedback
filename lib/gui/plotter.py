@@ -10,7 +10,6 @@ class Plotter:
     self.isThresholdDef = 0
     self.verbose = options.debug
     self.record = options.record
-    self.color_scheme = options.color_scheme
     self.nrois = 0
     self.ymin = 0
     self.ymax = 0
