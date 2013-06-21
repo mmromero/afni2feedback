@@ -26,12 +26,6 @@ ERROR = 1
 SUCCESS = 0
 
 # -------------------------- UTILS FUNCTIONS --------------------------------#
-
-def log(verbose, text):
-    if verbose > 1:
-        print("%s" % text)
-
-
         
 def parse_options():
     """
@@ -59,13 +53,11 @@ def parse_options():
                       help="If present it records a mpg4 video \
                       of the experiment.")
                       
-
-
-    parser.add_option("-m", "--trs-mean", action="store", 
-                      dest="trs_mean", type="int", default=3, 
-                      help="Set the number of first received ROI values \n\
-                      taken into account to calculate the average value. Y \n\
-                      span and threshold are based on this mean.")                      
+    parser.add_option("-n", "--number-volumes", action="store", 
+                      dest="numvols", type="int",
+                      help="Set the number of volumes scanned during a \n\
+                      resting period. Activation period is assumed to have\n\
+                      the same number of volumes.")                      
                       
     parser.add_option("-o", "--port", action="store", dest="port", 
                       default=53214, type="int", 
@@ -77,6 +69,11 @@ def parse_options():
                       ROI values received.")     
                       
     options, args = parser.parse_args()
+    
+    if not options.numvols:
+        parser.error("Number of volumes for resting and activations period\n\
+        is a required argument. See -n option in --help.")
+        parser.exit(ERROR)
     
     return options
 
@@ -90,82 +87,111 @@ class Neurofeedback:
         self.options = options        
     
     def process_run (self):
-                   # Show restin state image
-            self.graph.set_rest_values()
-            self.graph.start_rest()
-    
-            # Wait for new data
-            if self.comm.wait_for_new_run():
-              log(options.debug, "error waiting for new run\nclosing port")
-              self.comm.close_data_ports()
-              return ERROR
-    
-              
-    
-            # Initialise the average variable
-            trs_average = 0
-              
-    
-            # Iterate first TRs
-            for i in np.arange(self.options.trs_mean):
-    
-                # Read new data
-                if self.comm.read_TR_data():
-                  log(options.debug, "error reading data\nclosing port")
-                  self.comm.close_data_ports()
-                  return ERROR
-    
-            # Use the first values to calculate the Y range and threshold
-            # level. Then plot.
-            rois_values = self.comm.get_rois_values()
-            print(rois_values)
+
+        # Wait for new data
+        if self.comm.wait_for_new_run():
+            if self.options.debug > 1: print "error waiting for new run\nclosing port"
+            self.comm.close_data_ports()
+            return ERROR
+
+        self.graph.start_rest()
+
+        # Firts block is a resting block
+        for i in np.arange(self.options.numvols): 
+            self.comm.read_TR_data()
+
+        if self.options.debug > 2: 
+                print "resting rois: " + ",".join(map(str,self.comm.get_rois_values()))        
+        
+        # Recalculate baseline
+        rois_sum = sum(sum(float(el) for el in els) for els in self.comm.get_rois_values())
+        baseline = rois_sum / (self.options.numvols * 
+                                  self.comm.get_rois_number())
+                                  
             
-    
-            rois_sum = sum(sum(float(el) for el in els) for els in rois_values)
-            trs_average = rois_sum / (self.options.trs_mean * 
+        if self.options.threshold:
+            self.graph.set_threshold(baseline *
+                                    (1 + self.options.threshold/100))
+            
+        self.graph.set_run_values(self.comm.get_rois_number(), 
+                                  [baseline*0.97, baseline*1.07])
+
+        strbaseline = '## baseline: %f \n' % baseline
+        self.comm.write_log(strbaseline)
+
+        # Start plotting
+        self.graph.start_run()
+        
+        resting_roi_values = []
+
+        while 1:
+            
+            # If it is resting period store the values reived
+            while not self.comm.read_TR_data() and self.comm.is_resting_period():
+                #Store latest values
+                resting_roi_values.append(
+                self.comm.get_last_roi_values(self.comm.get_rois_values()))            
+            
+            if self.comm.is_closed():
+                self.graph.start_rest()
+                return
+            
+            if self.options.debug > 2: 
+                print "resting rois: " + ",".join(map(str,resting_roi_values))
+            
+            # Recalculate baseline
+            rois_sum = sum(sum(float(el) for el in els) for els in resting_roi_values)
+            baseline = rois_sum / (self.options.numvols * 
                                       self.comm.get_rois_number())
-    
+            
+            strbaseline = '## baseline: %f \n' % baseline
+            self.comm.write_log(strbaseline)
+            
             if self.options.threshold:
-                self.graph.set_threshold(trs_average *
+                self.graph.set_threshold(baseline *
                                         (1 + self.options.threshold/100))
                 
             self.graph.set_run_values(self.comm.get_rois_number(), 
-                                      [trs_average*0.97, trs_average*1.07])
-            self.graph.start_run()
+                                      [baseline*0.97, baseline*1.07])
+    
             
-            while not self.comm.read_TR_data(): 
+            # If activation pariod read values
+            while not self.comm.read_TR_data() and not self.comm.is_resting_period():
                 pass
-        
-    def iterate_for_runs(self):
-        while 1:
-            self.process_run()            
+
+            if self.comm.is_closed():
+                self.graph.start_rest()
+                return               
             
-        self.comm.close_data_ports()         
-                 
-        return SUCCESS    
+            # Restart the last rois values vector and append the first 
+            # resting value
+            resting_roi_values = []
+            resting_roi_values.append(
+                self.comm.get_last_roi_values(self.comm.get_rois_values()))
+            
         
 
     def run(self):
 
         # Open the socket
         if self.comm.open_incoming_socket():
-          log(options.debug, "error openning socket %s\n closing port" % \
-          self.options.port)
+          if self.options.debug > 1: 
+             print  "error openning socket %s\n closing port" % self.options.port
           self.comm.close_data_ports()
           return ERROR          
 
         # Start the self.graphical area
         if self.options.plot == GRAPH_BR:
-            log(options.debug, "starting bar plot...")
+            if self.options.debug > 1: print  "starting bar plot..."
             self.graph = bp.BarPlotter(self.options)
         elif self.options.plot == GRAPH_TL:
-            log(options.debug, "starting timeline plot...")
+            if self.options.debug > 1: print "starting timeline plot..."
             self.graph = tlp.TimelinePlotter(self.options)
         else:
             print "Unknown graph style %s" %self.options.plot
             
         # Start listening from data    
-        thread.start_new_thread (self.iterate_for_runs, ())
+        thread.start_new_thread (self.process_run, ())
         
         # Show image from main thread
         self.graph.show(self.comm.get_last_values)

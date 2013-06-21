@@ -30,6 +30,9 @@ class AfniRt:
     # Afni RTInterface object
     self.RTI = RT.RTInterface()
     
+    # Store the number of volumes per resting and activation period
+    self.number_volues = options.numvols
+    
     # Define the port
     if options.port > 0:
       self.RTI.server_port =  options.port
@@ -43,7 +46,19 @@ class AfniRt:
     if self.log:
         file_name = "run_%s.log" %time.time()
         self.file = open(file_name, "w+")
+        self.file.write('## Executing wiht parameters: \n')
+        self.file.write('## \tPlot: ' + str(options.plot) + ' \n')
+        self.file.write('## \tDebug: ' + str(options.debug) + '\n')
+        if options.threshold:
+            self.file.write('## \tThreshold: ' + str(options.threshold) + ' %\n')
+        self.file.write('## \tRecord: ' + str(options.record) + '\n')
+        self.file.write('## \tNumber of volumes for resting: ' + str(options.numvols) + ' \n')
+        self.file.write('## \tPort: ' + str(options.port) + '\n')
+        self.file.write('\n')
     
+  def write_log(self, text):
+      self.file.write(str(text))
+
   def write_tr(self, tr, time, roi_values):
       text = str(tr) + '\t' + str(time) + '\t' + str(roi_values) + '\n'
       self.file.write(text)
@@ -74,11 +89,22 @@ class AfniRt:
     
     if not result:
         if self.log and not self.file.closed:
-            self.write_tr(self.RTI.nread, 
+            # If the module is zero it is the first value in resting or activation
+            if self.get_num_read() % self.number_volues == 0:
+                # If is resting
+                if self.is_resting_period():
+                    self.file.write('\n## Resting number ' + str((self.get_num_read() - self.number_volues )/ (self.number_volues*2)) + '\n')
+                else:
+                    self.file.write('\n## Activation number ' + str((self.get_num_read() - self.number_volues) / (self.number_volues*2)) + '\n')
+
+            self.write_tr(self.get_num_read(), 
                           datetime.datetime.now().strftime("%H:%M:%S.%f"), 
                           self.get_last_roi_values(self.get_rois_values()))
         
     return result
+    
+  def is_closed(self):
+      return self.RTI.socket_has_closed()
     
   def close_data_ports(self):
     """Closes the socket"""
@@ -99,9 +125,8 @@ class AfniRt:
     return self.RTI.nextra
 
   def get_num_read(self):
-    """ Returns the number of TR read per connection"""
-    return self.RTI.nread
-    
+    """ Returns the number of TR read per connection, zero based"""
+    return self.RTI.nread - 1
   
   def get_last_roi_values(self, rois_values):
     """                                 ROI1            ROI2                 ROIN
@@ -127,6 +152,33 @@ class AfniRt:
       
     yield roi_values
     
+
+
+  def is_resting_period(self):
+      """
+      Resting periods are always at the begining of the cycle:
+          
+       |           |              |
+       |           |              |
+       | RESTING 0 | ACTIVATION 0 | ...
+       |           |              |
+       |           |              |
+      """
+      result = False
+
+      if self.get_num_read() < self.number_volues:
+         result = True
+         
+      else:
+          # Shift the TRs number for an easy block detection
+          nread = self.get_num_read() - self.number_volues 
+
+          # If the division result is even it is resting, otherwise activation
+          if (nread / self.number_volues) % 2 == 0 :
+            result = True
+    
+      return result
+      
     
 #-----------------------------------------------------------------------------------------------------------
     

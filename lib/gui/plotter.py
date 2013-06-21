@@ -15,7 +15,6 @@ class Plotter:
     self.ymax = 0
     self.xValues = []
     self.yValues = []
-    self.trs_to_mean = options.trs_mean + 1
     self.fig = plt.figure()
     self.fig.patch.set_facecolor('black')
     self.ax = self.fig.add_subplot(111)
@@ -31,6 +30,8 @@ class Plotter:
     """ sets the threshold """
     self.threshold = threshold
     self.isThresholdDef = 1
+    
+    if self.verbose > 2:print "New threshold: %f" %threshold    
 
   def update(self, tr_values):
     """ draw in the next position the set of values passed by argument """
@@ -44,7 +45,7 @@ class Plotter:
         if self.verbose > 2:print "TR number: ", num_trs
         
         if len(self.xValues) > 0:
-          if self.xValues[-1] < (num_trs - self.trs_to_mean):
+          if self.xValues[-1] < num_trs:
             self.draw(values)
           else:
             pass            
@@ -95,7 +96,9 @@ class Plotter:
     if self.verbose > 1:print "Setting run values..."
 
     self.ymin = lims[0]
-    self.ymax = lims[1]       
+    self.ymax = lims[1]   
+
+    if self.verbose > 2:print "New Y limits: " + ", ".join(map(str,lims))  
 
 #    if not self.shown:
     self.nrois = nrois
@@ -111,7 +114,7 @@ class Plotter:
     elif self.nrois == 5:
       self.lines = self.ax.plot([],[],[],[],[],[],[],[],[],[], color='w', linestyle='-', linewidth=2)
     else:
-      print ("Invalid number of ROIs: %d" % nrois)
+      if self.verbose > 1:print ("Invalid number of ROIs: %d" % nrois)
       raise AttributeError('The number of rois must be a value between 1 and 5, both included.') 
 
 
