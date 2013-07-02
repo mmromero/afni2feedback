@@ -38,6 +38,7 @@ class TimelinePlotter(plotter.Plotter):
           self.ax.axis([CurrentXAxis.min(), CurrentXAxis.max() + self.NpointsA, self.ymin, self.ymax])
           
       if self.isThresholdDef:
+        self.clean_threshold()
         self.hline = self.ax.axhline(y=self.threshold, color='w', linestyle='--', linewidth=1)
               
     else:

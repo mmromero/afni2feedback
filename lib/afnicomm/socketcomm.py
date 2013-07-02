@@ -57,7 +57,8 @@ class AfniRt:
         self.file.write('\n')
     
   def write_log(self, text):
-      self.file.write(str(text))
+      if self.log:
+        self.file.write(str(text))
 
   def write_tr(self, tr, time, roi_values):
       text = str(tr) + '\t' + str(time) + '\t' + str(roi_values) + '\n'

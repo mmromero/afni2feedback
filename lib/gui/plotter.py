@@ -31,7 +31,12 @@ class Plotter:
     self.threshold = threshold
     self.isThresholdDef = 1
     
-    if self.verbose > 2:print "New threshold: %f" %threshold    
+    if self.verbose > 2:print "New threshold: %f" %threshold   
+    
+  def clean_threshold(self):
+    if self.isThresholdDef and self.hline:
+        self.hline.remove()
+        self.hline = None
 
   def update(self, tr_values):
     """ draw in the next position the set of values passed by argument """
@@ -53,9 +58,7 @@ class Plotter:
           self.draw(values)
     
     else:
-        if self.hline:
-            self.hline.remove()
-            self.hline = None
+        self.clean_threshold()
         
         if self.lines:
             for line in self.lines:
