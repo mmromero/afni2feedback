@@ -28,18 +28,22 @@ class TimelinePlotter(plotter.Plotter):
           CurrentXAxis=plb.arange(0 ,len(self.yValues))
           for i in plb.arange(0,self.nrois,1):
             self.lines[i].set_data(CurrentXAxis,yvt[i])
+            self.lines[i].set_color(self.get_line_color())
         
           self.ax.axis([0, self.NpointsB + self.NpointsA, self.ymin, self.ymax])
       else:
           CurrentXAxis=plb.arange(len(self.yValues)-self.NpointsB, len(self.yValues),1)
           for i in plb.arange(0,self.nrois,1):
             self.lines[i].set_data(CurrentXAxis,yvt[i][-self.NpointsB:])
+            self.lines[i].set_color(self.get_line_color())
+
     
           self.ax.axis([CurrentXAxis.min(), CurrentXAxis.max() + self.NpointsA, self.ymin, self.ymax])
           
       if self.isThresholdDef:
         self.clean_threshold()
-        self.hline = self.ax.axhline(y=self.threshold, color='w', linestyle='--', linewidth=1)
+        self.hline = self.ax.axhline(y=self.threshold, linestyle='--', linewidth=1)
+        self.hline.set_color(self.get_line_color())
               
     else:
        if self.verbose > 1:print("Invalid inpunt values")

@@ -88,13 +88,13 @@ class Neurofeedback:
     
     def process_run (self):
 
+        self.graph.clear_plot()
+
         # Wait for new data
         if self.comm.wait_for_new_run():
             if self.options.debug > 1: print "error waiting for new run\nclosing port"
             self.comm.close_data_ports()
             return ERROR
-
-        self.graph.start_rest()
 
         # Firts block is a resting block
         for i in np.arange(self.options.numvols): 
@@ -118,13 +118,13 @@ class Neurofeedback:
 
         strbaseline = '## baseline: %f \n' % baseline
         self.comm.write_log(strbaseline)
-
-        # Start plotting
-        self.graph.start_run()
         
         resting_roi_values = []
 
         while 1:
+            
+            # Start plotting
+            self.graph.start_resting()            
             
             # If it is resting period store the values reived
             while not self.comm.read_TR_data() and self.comm.is_resting_period():
@@ -133,7 +133,7 @@ class Neurofeedback:
                 self.comm.get_last_roi_values(self.comm.get_rois_values()))            
             
             if self.comm.is_closed():
-                self.graph.start_rest()
+                self.graph.clear_plot()
                 return
             
             if self.options.debug > 2: 
@@ -154,13 +154,16 @@ class Neurofeedback:
             self.graph.set_run_values(self.comm.get_rois_number(), 
                                       [baseline*0.97, baseline*1.07])
     
+
+            # Start plotting
+            self.graph.start_activation()            
             
             # If activation pariod read values
             while not self.comm.read_TR_data() and not self.comm.is_resting_period():
                 pass
 
             if self.comm.is_closed():
-                self.graph.start_rest()
+                self.graph.clear_plot()
                 return               
             
             # Restart the last rois values vector and append the first 

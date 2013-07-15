@@ -22,10 +22,10 @@ class BarPlotter(plotter.Plotter):
       self.ax.cla()
       self.ax.axis([x[0]-0.8, x[-1]+0.8, self.ymin, self.ymax])
       
-      self.lines = self.ax.bar(x,values,width=0.8,bottom=0,align='center',color='w')
+      self.lines = self.ax.bar(x,values,width=0.8,bottom=0,align='center',color=self.get_line_color())
       
       if self.isThresholdDef:
-        self.hline = self.ax.axhline(y=self.threshold, color='w', linestyle='--')
+        self.hline = self.ax.axhline(y=self.threshold, color=self.get_line_color(), linestyle='--')
 
     else:
 	if self.verbose > 1:print "No values to plot"

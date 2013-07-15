@@ -21,8 +21,7 @@ class Plotter:
     self.ax.set_axis_bgcolor('black')
     self.anim = None
     self.lines = []
-    self.shown = False
-    self.status = 'Resting'
+    self.status = 'Cleared'
     self.hline = None
 
     
@@ -41,7 +40,7 @@ class Plotter:
   def update(self, tr_values):
     """ draw in the next position the set of values passed by argument """
 
-    if self.status == 'Run':
+    if self.status == 'Act' or self.status == 'Rest':
 
         values = tr_values.rois
         num_trs = tr_values.tr_number    
@@ -56,7 +55,7 @@ class Plotter:
             pass            
         else:
           self.draw(values)
-    
+   
     else:
         self.clean_threshold()
         
@@ -76,23 +75,39 @@ class Plotter:
     
     return self.lines
 
+  def clear_plot(self):
+      
+      
+    if self.verbose > 0:print "\n++ Plot cleared."
+    
+    self.status = 'Cleared'
   
-  def start_rest(self):
+  
+  def start_resting(self):
 
     if self.verbose > 0:print "\n++ Starting RESTING period"
+
+    self.fig.patch.set_facecolor('black')
+    self.ax.set_axis_bgcolor('black')
+                
+    self.status = 'Rest'
+
+
+  def start_activation(self):
+
+    if self.verbose > 0:print "\n++ Starting ACTIVATION period"
     
-    self.status = 'Resting'
-
-
-  def start_run(self):
-
-    if self.verbose > 0:print "\n++ Starting RUNNING period"
+    self.fig.patch.set_facecolor('white')
+    self.ax.set_axis_bgcolor('white')
     
-    self.status = 'Run'        
-
-  def set_rest_values(self, message = None):
-      pass
-            
+    self.status = 'Act'        
+    
+    
+  def get_line_color(self):
+      if self.status == 'Rest':
+          return 'white'
+      else:
+          return 'black'
     
   def set_run_values(self, nrois, lims):
       
@@ -103,19 +118,18 @@ class Plotter:
 
     if self.verbose > 2:print "New Y limits: " + ", ".join(map(str,lims))  
 
-#    if not self.shown:
     self.nrois = nrois
 
     if self.nrois == 1:
-      self.lines = self.ax.plot([],[], color='w', linestyle='-', linewidth=2)
+      self.lines = self.ax.plot([],[], color="white", linestyle='-', linewidth=2)
     elif self.nrois == 2:
-      self.lines = self.ax.plot([],[],[],[], color='w', linestyle='-', linewidth=2)
+      self.lines = self.ax.plot([],[],[],[], color="white", linestyle='-', linewidth=2)
     elif self.nrois == 3:
-      self.lines = self.ax.plot([],[],[],[],[],[], color='w', linestyle='-', linewidth=2)
+      self.lines = self.ax.plot([],[],[],[],[],[], color="white", linestyle='-', linewidth=2)
     elif self.nrois == 4:
-      self.lines = self.ax.plot([],[],[],[],[],[],[],[], color='w', linestyle='-', linewidth=2)
+      self.lines = self.ax.plot([],[],[],[],[],[],[],[], color="white", linestyle='-', linewidth=2)
     elif self.nrois == 5:
-      self.lines = self.ax.plot([],[],[],[],[],[],[],[],[],[], color='w', linestyle='-', linewidth=2)
+      self.lines = self.ax.plot([],[],[],[],[],[],[],[],[],[], color="white", linestyle='-', linewidth=2)
     else:
       if self.verbose > 1:print ("Invalid number of ROIs: %d" % nrois)
       raise AttributeError('The number of rois must be a value between 1 and 5, both included.') 
