@@ -3,6 +3,12 @@ from matplotlib import animation as anim
 import time
 import gc
 
+# 7% over the baseline
+UPPERLIMIT = 0.07 
+
+# 5% down the baseline
+LOWERLIMIT = 0.05
+
 class Plotter:
 
   def __init__(self, options):
@@ -17,8 +23,12 @@ class Plotter:
     self.yValues = []
     self.fig = plt.figure()
     self.fig.patch.set_facecolor('black')
+    self.fig_title = self.fig.suptitle('', size=25);
     self.ax = self.fig.add_subplot(111)
     self.ax.set_axis_bgcolor('black')
+    self.ax.xaxis.set_visible(False)
+    self.ax.yaxis.set_visible(False)
+    self.ax.set_frame_on(False)
     self.anim = None
     self.lines = []
     self.status = 'Cleared'
@@ -66,12 +76,15 @@ class Plotter:
             self.ax.cla()
             gc.collect()
             
+        self.fig_title.set_text('');
         self.xValues = []
         self.yValues = []
         self.ymin = 0
         self.ymax = 0
         self.threshold = 0
         self.isThresholdDef = 0
+        self.fig.patch.set_facecolor('black')
+        self.ax.set_axis_bgcolor('black')
     
     return self.lines
 
@@ -89,6 +102,9 @@ class Plotter:
 
     self.fig.patch.set_facecolor('black')
     self.ax.set_axis_bgcolor('black')
+    
+    self.fig_title.set_text('REST')
+    self.fig_title.set_color('white')    
                 
     self.status = 'Rest'
 
@@ -99,6 +115,9 @@ class Plotter:
     
     self.fig.patch.set_facecolor('white')
     self.ax.set_axis_bgcolor('white')
+
+    self.fig_title.set_text('ACTIVATION')
+    self.fig_title.set_color('black')    
     
     self.status = 'Act'        
     
@@ -109,14 +128,15 @@ class Plotter:
       else:
           return 'black'
     
-  def set_run_values(self, nrois, lims):
+  def set_run_values(self, nrois, baseline):
       
     if self.verbose > 1:print "Setting run values..."
 
-    self.ymin = lims[0]
-    self.ymax = lims[1]   
+    self.ymax = baseline * (1 + UPPERLIMIT)
+    self.ymin = baseline * (1 - LOWERLIMIT)
 
-    if self.verbose > 2:print "New Y limits: " + ", ".join(map(str,lims))  
+    if self.verbose > 2:print "New Y limits: " + str(self.ymax) + ", " + \
+                                                            str(self.ymin)
 
     self.nrois = nrois
 

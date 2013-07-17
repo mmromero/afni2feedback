@@ -113,8 +113,7 @@ class Neurofeedback:
             self.graph.set_threshold(baseline *
                                     (1 + self.options.threshold/100))
             
-        self.graph.set_run_values(self.comm.get_rois_number(), 
-                                  [baseline*0.97, baseline*1.07])
+        self.graph.set_run_values(self.comm.get_rois_number(), baseline)
 
         strbaseline = '## baseline: %f \n' % baseline
         self.comm.write_log(strbaseline)
@@ -151,9 +150,7 @@ class Neurofeedback:
                 self.graph.set_threshold(baseline *
                                         (1 + self.options.threshold/100))
                 
-            self.graph.set_run_values(self.comm.get_rois_number(), 
-                                      [baseline*0.97, baseline*1.07])
-    
+            self.graph.set_run_values(self.comm.get_rois_number(), baseline)    
 
             # Start plotting
             self.graph.start_activation()            
