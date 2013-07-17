@@ -77,6 +77,31 @@ def parse_options():
     
     return options
 
+
+def get_baseline(rois_vals, logger = None):
+        """
+        Get the average value of the rois in the argument    
+        """
+        
+        if isinstance(rois_vals, list):
+            numrois = len(rois_vals)
+            if isinstance(rois_vals[0], list):
+                numvols = len(rois_vals[0])
+            else:
+                numvols = 1
+        else:
+            return None
+        
+    
+        rois_sum = sum(sum(float(el) for el in els) for els in rois_vals)
+        baseline = rois_sum / (numrois*numvols)
+                                  
+        strbaseline = '## baseline: %f \n' % baseline
+        if logger:
+            logger.write_log(strbaseline)
+        
+        return baseline
+
 # ----------------------------- MAIN CLASS ----------------------------------#
 
 class Neurofeedback:
@@ -104,19 +129,14 @@ class Neurofeedback:
                 print "resting rois: " + ",".join(map(str,self.comm.get_rois_values()))        
         
         # Recalculate baseline
-        rois_sum = sum(sum(float(el) for el in els) for els in self.comm.get_rois_values())
-        baseline = rois_sum / (self.options.numvols * 
-                                  self.comm.get_rois_number())
-                                  
-            
+        baseline = get_baseline(self.comm.get_rois_values(), self.comm)
+
+        # Set plotting values            
         if self.options.threshold:
             self.graph.set_threshold(baseline *
                                     (1 + self.options.threshold/100))
             
         self.graph.set_run_values(self.comm.get_rois_number(), baseline)
-
-        strbaseline = '## baseline: %f \n' % baseline
-        self.comm.write_log(strbaseline)
         
         resting_roi_values = []
 
@@ -139,13 +159,9 @@ class Neurofeedback:
                 print "resting rois: " + ",".join(map(str,resting_roi_values))
             
             # Recalculate baseline
-            rois_sum = sum(sum(float(el) for el in els) for els in resting_roi_values)
-            baseline = rois_sum / (self.options.numvols * 
-                                      self.comm.get_rois_number())
-            
-            strbaseline = '## baseline: %f \n' % baseline
-            self.comm.write_log(strbaseline)
-            
+            baseline = get_baseline(resting_roi_values, self.comm)
+
+            # Set plotting values
             if self.options.threshold:
                 self.graph.set_threshold(baseline *
                                         (1 + self.options.threshold/100))
