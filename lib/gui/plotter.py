@@ -3,11 +3,11 @@ from matplotlib import animation as anim
 import time
 import gc
 
-# 7% over the baseline
-UPPERLIMIT = 0.07 
+# 6% over the baseline
+UPPERLIMIT = 0.06 
 
-# 5% down the baseline
-LOWERLIMIT = 0.05
+# 3% down the baseline
+LOWERLIMIT = 0.03
 
 class Plotter:
 
