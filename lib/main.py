@@ -25,6 +25,9 @@ GRAPH_BR = 'bar'
 ERROR = 1
 SUCCESS = 0
 
+# Bold signal inertia compensation
+INERTIA_TRS = 2
+
 # -------------------------- UTILS FUNCTIONS --------------------------------#
         
 def parse_options():
@@ -143,7 +146,13 @@ class Neurofeedback:
         while 1:
             
             # Start plotting
-            self.graph.start_resting()            
+            self.graph.start_resting()  
+            
+            # Inertia compensation
+            for i in np.arange(INERTIA_TRS): 
+                self.comm.read_TR_data()
+                
+            self.graph.show_feedback()
             
             # If it is resting period store the values reived
             while not self.comm.read_TR_data() and self.comm.is_resting_period():
@@ -170,6 +179,13 @@ class Neurofeedback:
 
             # Start plotting
             self.graph.start_activation()            
+            
+            # Inertia compensation
+            for i in np.arange(INERTIA_TRS): 
+                self.comm.read_TR_data()
+                
+            self.graph.show_feedback()
+            
             
             # If activation pariod read values
             while not self.comm.read_TR_data() and not self.comm.is_resting_period():

@@ -29,6 +29,8 @@ class Plotter:
     self.ax.xaxis.set_visible(False)
     self.ax.yaxis.set_visible(False)
     self.ax.set_frame_on(False)
+    self.annotation = plt.text(0.5, 0.5,'REST',horizontalalignment='center',
+          verticalalignment='center', transform = self.ax.transAxes, size=50)
     self.anim = None
     self.lines = []
     self.status = 'Cleared'
@@ -66,7 +68,7 @@ class Plotter:
         else:
           self.draw(values)
    
-    else:
+    elif self.status == 'Clear':
         self.clean_threshold()
         
         if self.lines:
@@ -76,6 +78,8 @@ class Plotter:
             self.ax.cla()
             gc.collect()
             
+
+        self.annotation.set_text('')
         self.fig_title.set_text('');
         self.xValues = []
         self.yValues = []
@@ -93,20 +97,26 @@ class Plotter:
       
     if self.verbose > 0:print "\n++ Plot cleared."
     
-    self.status = 'Cleared'
+    self.status = 'Clear'
   
   
   def start_resting(self):
 
     if self.verbose > 0:print "\n++ Starting RESTING period"
-
+    
     self.fig.patch.set_facecolor('black')
     self.ax.set_axis_bgcolor('black')
-    
-    self.fig_title.set_text('REST')
-    self.fig_title.set_color('white')    
+
+    self.fig_title.set_text('');
+
+    self.annotation = plt.text(0.5, 0.5,'REST',horizontalalignment='center',
+          verticalalignment='center', transform = self.ax.transAxes, size=50,
+          color='white')
+   # self.annotation.set_text('REST')
+   # self.annotation.set_color('white')
+   # self.annotation.set_zorder(2000)
                 
-    self.status = 'Rest'
+    self.status = 'Hold-Rest'
 
 
   def start_activation(self):
@@ -116,10 +126,33 @@ class Plotter:
     self.fig.patch.set_facecolor('white')
     self.ax.set_axis_bgcolor('white')
 
-    self.fig_title.set_text('ACTIVATION')
-    self.fig_title.set_color('black')    
+    self.fig_title.set_text('');    
+
+    self.annotation = plt.text(0.5, 0.5,'ACTIVATION',horizontalalignment='center',
+          verticalalignment='center', transform = self.ax.transAxes, size=50,
+          color='black')
+
+    # self.annotation.set_text('ACTIVATION')
+    # self.annotation.set_color('black')
+    # self.annotation.set_zorder(2000)
     
-    self.status = 'Act'        
+    self.status = 'Hold-Act'        
+    
+
+  def show_feedback(self):    
+
+    self.annotation.set_text('')   
+    self.annotation.set_zorder(0)
+    
+    if self.status == 'Hold-Rest':
+        self.status = 'Rest'
+        self.fig_title.set_text('REST')
+        self.fig_title.set_color('white')    
+    elif self.status == 'Hold-Act':
+        self.status = 'Act'
+        self.fig_title.set_text('ACTIVATION')
+        self.fig_title.set_color('black') 
+        
     
     
   def get_line_color(self):
